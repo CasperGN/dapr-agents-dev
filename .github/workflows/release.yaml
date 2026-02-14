@@ -103,14 +103,7 @@ jobs:
             --timeout 15m
 
       - name: Run Chainsaw tests
-        run: chainsaw test tests/chainsaw/core-install/ --report-format JSON --report-name release-test-results
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-test-results
-          path: release-test-results.json
+        run: make test-chainsaw
 
   # ---------------------------------------------------------------------------
   # Job 3: Create release, push OCI image, create git tag
@@ -135,7 +128,7 @@ jobs:
         run: helm dependency update ./dapr-agents
 
       - name: Helm lint
-        run: helm lint ./dapr-agents --set llm.apiKey=release-lint-key
+        run: make test-lint
 
       - name: Package chart
         run: helm package ./dapr-agents

@@ -45,38 +45,11 @@ jobs:
       - name: Helm dependency update
         run: helm dependency update ./dapr-agents
 
-      - name: Helm lint (minimal)
-        run: |
-          helm lint ./dapr-agents \
-            --set llm.apiKey=lint-key \
-            --set monitoring.enabled=false \
-            --set kagent.enabled=false
-
       - name: Helm lint (full)
-        run: helm lint ./dapr-agents --set llm.apiKey=lint-key
+        run: make test-lint
 
       - name: Template validation (minimal - own templates only)
-        run: |
-          helm template dapr-agents ./dapr-agents \
-            --namespace dapr-agents \
-            --set monitoring.enabled=false \
-            --set kagent.enabled=false \
-            --set dapr.enabled=false \
-            --set llm.apiKey=test-key \
-            | kubeconform -strict -summary \
-              -schema-location default \
-              -skip CustomResourceDefinition
-
-      - name: Template validation (with dapr)
-        run: |
-          helm template dapr-agents ./dapr-agents \
-            --namespace dapr-agents \
-            --set monitoring.enabled=false \
-            --set kagent.enabled=false \
-            --set llm.apiKey=test-key \
-            | kubeconform -strict -summary \
-              -schema-location default \
-              -skip CustomResourceDefinition,Component,HTTPEndpoint
+        run: make test-templates
 
   integration-test:
     name: Integration (${{ matrix.k8s-version }})
@@ -115,11 +88,4 @@ jobs:
         run: helm dependency update ./dapr-agents
 
       - name: Run Chainsaw core-install tests
-        run: chainsaw test tests/chainsaw/core-install/ --report-format JSON --report-name core-install-results
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: chainsaw-results-${{ matrix.k8s-version }}
-          path: core-install-results.json
+        run: make test-chainsaw

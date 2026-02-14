@@ -51,11 +51,4 @@ jobs:
             --timeout 15m
 
       - name: Run Chainsaw tests
-        run: chainsaw test tests/chainsaw/core-install/ --report-format JSON --report-name nightly-results
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: nightly-results
-          path: nightly-results.json
+        run: make test-chainsaw
