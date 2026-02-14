@@ -124,7 +124,12 @@ test-template:
 .PHONY: test-chainsaw
 test-chainsaw:
 	@echo "### Running Chainsaw integration tests... ###"
-	@chainsaw test tests/chainsaw/ --report-format JSON --report-name chainsaw-results --kube-context kind-$(TEST_CLUSTER_NAME)
+	@helm dependency update ./dapr-agents
+	@kind create cluster --name $(TEST_CLUSTER_NAME) --config $(TEST_KIND_CONFIG) || true
+	@chainsaw test tests/chainsaw/ --report-format JSON --report-name chainsaw-results --kube-context kind-$(TEST_CLUSTER_NAME); \
+		exit_code=$$?; \
+		kind delete cluster --name $(TEST_CLUSTER_NAME); \
+		exit $$exit_code
 
 TEST_CLUSTER_NAME ?= dapr-agents-test
 TEST_KIND_CONFIG  ?= tests/kind-config-test.yaml

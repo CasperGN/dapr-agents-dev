@@ -22,7 +22,19 @@ loki:
     storage:
       type: filesystem
       bucketNames: { chunks: chunks, ruler: ruler, admin: admin }
-  singleBinary: { replicas: 1 }
+  gateway:
+    tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
+    affinity: {}
+  singleBinary:
+    replicas: 1
+    tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
+    affinity: {}
   read: { replicas: 0 }
   write: { replicas: 0 }
   backend: { replicas: 0 }
@@ -32,6 +44,10 @@ tempo:
 
 kube-prometheus-stack:
   enabled: true
+  crds:
+    upgradeJob:
+      enabled: true
+      forceConflicts: true
   prometheus:
     prometheusSpec:
       serviceMonitorSelectorNilUsesHelmValues: false

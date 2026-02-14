@@ -242,8 +242,8 @@ spec:
         - script:
             content: |
               # Get the node port of the test gateway
-              PORT=$(kubectl get svc gateway -n ($NAMESPACE) -o jsonpath='{.spec.ports[0].nodePort}')
-              curl -s http://localhost:$PORT | grep "dapr-agents-core gateway (Subdomains)"
+              PORT=$(kubectl get svc gateway -n $NAMESPACE -o jsonpath='{.spec.ports[0].nodePort}')
+              curl -s http://localhost:$PORT | grep "dapr-agents gateway"
 
     # Step 10: Cleanup
     - name: cleanup

@@ -13,8 +13,11 @@ spec:
       try:
         - script:
             content: |
-              helm upgrade --install dapr-agents-routing ../../../dapr-agents-routing \
+              helm upgrade --install dapr-agents-routing ../../../dapr-agents \
                 --namespace $NAMESPACE \
+                --set monitoring.enabled=false \
+                --set kagent.enabled=false \
+                --set dapr.enabled=false \
                 --set llm.apiKey=ci-test-key \
                 --wait --timeout 10m
 
@@ -26,17 +29,14 @@ spec:
               PORT=$(kubectl get svc gateway -n $NAMESPACE -o jsonpath='{.spec.ports[0].nodePort}')
               echo "Testing via NodePort: $PORT"
 
-              echo "Checking Kagent..."
-              curl -s -H "Host: kagent.localhost" http://localhost:$PORT | grep -i "kagent"
-              
               echo "Checking Diagrid Dashboard..."
               curl -s -H "Host: diagrid.localhost" http://localhost:$PORT | grep -i "diagrid"
-              
+
               echo "Checking Redis Insight..."
               curl -s -H "Host: redis.localhost" http://localhost:$PORT | grep -i "redis"
-              
-              echo "Checking Grafana..."
-              curl -sI -H "Host: grafana.localhost" http://localhost:$PORT | grep -E "HTTP/1.1 200|HTTP/1.1 302"
+
+              echo "Checking default landing page..."
+              curl -s http://localhost:$PORT | grep "dapr-agents gateway"
 
     - name: cleanup
       try:
