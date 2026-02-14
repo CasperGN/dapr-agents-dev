@@ -4,27 +4,16 @@ metadata:
   name: gateway-routing
 spec:
   description: Validate gateway subdomain routing works for all services
+  namespace: dapr-agents
   timeouts:
-    apply: 15m
     assert: 15m
-    delete: 5m
     exec: 15m
   steps:
-    - name: install-full-stack
-      try:
-        - script:
-            content: |
-              helm upgrade --install dapr-agents ../../../dapr-agents \
-                --namespace $NAMESPACE \
-                --set llm.apiKey=ci-test-key \
-                --wait --timeout 10m
-
     - name: check-subdomains
       try:
         - script:
             content: |
-              # Get the node port of the test gateway
-              PORT=$(kubectl get svc gateway -n $NAMESPACE -o jsonpath='{.spec.ports[0].nodePort}')
+              PORT=$(kubectl get svc gateway -n dapr-agents -o jsonpath='{.spec.ports[0].nodePort}')
               echo "Testing via NodePort: $PORT"
 
               echo "Checking Diagrid Dashboard..."
@@ -35,9 +24,3 @@ spec:
 
               echo "Checking default landing page..."
               curl -s http://localhost:$PORT | grep "dapr-agents gateway"
-
-    - name: cleanup
-      try:
-        - script:
-            content: |
-              helm uninstall dapr-agents --namespace $NAMESPACE

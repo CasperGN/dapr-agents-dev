@@ -27,6 +27,7 @@ help:
 	@echo "  test-down     Delete the integration test cluster"
 	@echo "  test-chainsaw Run Chainsaw integration tests (requires test cluster)"
 	@echo "  test          Run all tests (lint + template + chainsaw)"
+	@echo "  all           Create cluster and install the full stack"
 
 .PHONY: cluster-up
 cluster-up:
@@ -126,6 +127,12 @@ test-chainsaw:
 	@echo "### Running Chainsaw integration tests... ###"
 	@helm dependency update ./dapr-agents
 	@kind create cluster --name $(TEST_CLUSTER_NAME) --config $(TEST_KIND_CONFIG) || true
+	@echo "### Installing chart... ###"
+	@helm upgrade --install dapr-agents ./dapr-agents \
+		--namespace dapr-agents --create-namespace \
+		--set llm.apiKey=ci-test-key \
+		--kube-context kind-$(TEST_CLUSTER_NAME) \
+		--wait --timeout 10m
 	@chainsaw test tests/chainsaw/ --parallel 1 --report-format JSON --report-name chainsaw-results --kube-context kind-$(TEST_CLUSTER_NAME); \
 		exit_code=$$?; \
 		kind delete cluster --name $(TEST_CLUSTER_NAME); \
@@ -148,3 +155,6 @@ test-down:
 
 .PHONY: test
 test: test-lint test-template test-chainsaw
+
+.PHONY: all
+all: cluster-up install

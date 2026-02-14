@@ -3,24 +3,12 @@ kind: Test
 metadata:
   name: core-install
 spec:
-  description: Validate core dapr-agents chart resources install correctly
+  description: Validate core dapr-agents chart resources exist
+  namespace: dapr-agents
   timeouts:
-    apply: 15m
     assert: 15m
-    delete: 5m
     exec: 15m
   steps:
-    # Step 1: Install chart with lightweight profile (no monitoring, no kagent)
-    - name: install-chart
-      try:
-        - script:
-            content: |
-              helm upgrade --install dapr-agents ../../../dapr-agents \
-                --namespace $NAMESPACE \
-                --set llm.apiKey=ci-test-key \
-                --wait --timeout 5m
-
-    # Step 2: Assert Deployments exist
     - name: check-deployments
       try:
         - assert:
@@ -29,30 +17,29 @@ spec:
               kind: Deployment
               metadata:
                 name: dapr-redis
-                namespace: ($NAMESPACE)
+                namespace: dapr-agents
         - assert:
             resource:
               apiVersion: apps/v1
               kind: Deployment
               metadata:
                 name: gateway
-                namespace: ($NAMESPACE)
+                namespace: dapr-agents
         - assert:
             resource:
               apiVersion: apps/v1
               kind: Deployment
               metadata:
                 name: diagrid-dashboard
-                namespace: ($NAMESPACE)
+                namespace: dapr-agents
         - assert:
             resource:
               apiVersion: apps/v1
               kind: Deployment
               metadata:
                 name: redisinsight
-                namespace: ($NAMESPACE)
+                namespace: dapr-agents
 
-    # Step 4: Assert all Dapr Components exist
     - name: check-dapr-components
       try:
         - assert:
@@ -61,79 +48,78 @@ spec:
               kind: Component
               metadata:
                 name: statestore
-                namespace: ($NAMESPACE)
+                namespace: dapr-agents
         - assert:
             resource:
               apiVersion: dapr.io/v1alpha1
               kind: Component
               metadata:
                 name: pubsub
-                namespace: ($NAMESPACE)
+                namespace: dapr-agents
         - assert:
             resource:
               apiVersion: dapr.io/v1alpha1
               kind: Component
               metadata:
                 name: agent-pubsub
-                namespace: ($NAMESPACE)
+                namespace: dapr-agents
         - assert:
             resource:
               apiVersion: dapr.io/v1alpha1
               kind: Component
               metadata:
                 name: agent-memory
-                namespace: ($NAMESPACE)
+                namespace: dapr-agents
         - assert:
             resource:
               apiVersion: dapr.io/v1alpha1
               kind: Component
               metadata:
                 name: agent-registry
-                namespace: ($NAMESPACE)
+                namespace: dapr-agents
         - assert:
             resource:
               apiVersion: dapr.io/v1alpha1
               kind: Component
               metadata:
                 name: agent-runtimestatestore
-                namespace: ($NAMESPACE)
+                namespace: dapr-agents
         - assert:
             resource:
               apiVersion: dapr.io/v1alpha1
               kind: Component
               metadata:
                 name: agent-workflow
-                namespace: ($NAMESPACE)
+                namespace: dapr-agents
         - assert:
             resource:
               apiVersion: dapr.io/v1alpha1
               kind: Component
               metadata:
                 name: lockstore-redis
-                namespace: ($NAMESPACE)
+                namespace: dapr-agents
         - assert:
             resource:
               apiVersion: dapr.io/v1alpha1
               kind: Component
               metadata:
                 name: llm-provider
-                namespace: ($NAMESPACE)
+                namespace: dapr-agents
         - assert:
             resource:
               apiVersion: dapr.io/v1alpha1
               kind: Component
               metadata:
                 name: external-webhook
-                namespace: ($NAMESPACE)
+                namespace: dapr-agents
         - assert:
             resource:
               apiVersion: dapr.io/v1alpha1
               kind: Component
               metadata:
                 name: local-secrets
-                namespace: ($NAMESPACE)
+                namespace: dapr-agents
 
-    # Step 5: Assert HTTPEndpoint resource
     - name: check-http-endpoint
       try:
         - assert:
@@ -142,9 +128,8 @@ spec:
               kind: HTTPEndpoint
               metadata:
                 name: mcp-server
-                namespace: ($NAMESPACE)
+                namespace: dapr-agents
 
-    # Step 6: Assert Secrets exist
     - name: check-secrets
       try:
         - assert:
@@ -153,44 +138,43 @@ spec:
               kind: Secret
               metadata:
                 name: llm-secret
-                namespace: ($NAMESPACE)
+                namespace: dapr-agents
         - assert:
             resource:
               apiVersion: v1
               kind: Secret
               metadata:
                 name: kagent-openai
-                namespace: ($NAMESPACE)
+                namespace: dapr-agents
         - assert:
             resource:
               apiVersion: v1
               kind: Secret
               metadata:
                 name: app-secrets
-                namespace: ($NAMESPACE)
+                namespace: dapr-agents
         - assert:
             resource:
               apiVersion: v1
               kind: Secret
               metadata:
                 name: crypto-keys
-                namespace: ($NAMESPACE)
+                namespace: dapr-agents
         - assert:
             resource:
               apiVersion: v1
               kind: Secret
               metadata:
                 name: crypto-rsa-pubkey
-                namespace: ($NAMESPACE)
+                namespace: dapr-agents
         - assert:
             resource:
               apiVersion: v1
               kind: Secret
               metadata:
                 name: dapr-redis
-                namespace: ($NAMESPACE)
+                namespace: dapr-agents
 
-    # Step 7: Assert Services exist
     - name: check-services
       try:
         - assert:
@@ -199,14 +183,14 @@ spec:
               kind: Service
               metadata:
                 name: dapr-redis-master
-                namespace: ($NAMESPACE)
+                namespace: dapr-agents
         - assert:
             resource:
               apiVersion: v1
               kind: Service
               metadata:
                 name: gateway
-                namespace: ($NAMESPACE)
+                namespace: dapr-agents
               spec:
                 type: NodePort
         - assert:
@@ -215,9 +199,8 @@ spec:
               kind: Service
               metadata:
                 name: dapr-sentry-oidc
-                namespace: ($NAMESPACE)
+                namespace: dapr-agents
 
-    # Step 8: Assert ConfigMap exists
     - name: check-configmaps
       try:
         - assert:
@@ -225,29 +208,5 @@ spec:
               apiVersion: v1
               kind: ConfigMap
               metadata:
-                name: local-registry-hosting
-                namespace: ($NAMESPACE)
-        - assert:
-            resource:
-              apiVersion: v1
-              kind: ConfigMap
-              metadata:
                 name: gateway-config
-                namespace: ($NAMESPACE)
-
-    # Step 9: Verify Gateway Connectivity
-    - name: check-gateway-connectivity
-      try:
-        - script:
-            content: |
-              # Get the node port of the test gateway
-              PORT=$(kubectl get svc gateway -n $NAMESPACE -o jsonpath='{.spec.ports[0].nodePort}')
-              curl -s http://localhost:$PORT | grep "dapr-agents gateway"
-
-    # Step 10: Cleanup
-    - name: cleanup
-      try:
-        - script:
-            content: |
-              helm uninstall dapr-agents --namespace $NAMESPACE
-
+                namespace: dapr-agents

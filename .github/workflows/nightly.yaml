@@ -11,6 +11,7 @@ permissions:
 env:
   HELM_VERSION: "3.17.0"
   CHAINSAW_VERSION: "v0.2.12"
+  KUBECONFORM_VERSION: "v0.6.7"
 
 jobs:
   full-stack-test:
@@ -31,6 +32,13 @@ jobs:
             "https://github.com/kyverno/chainsaw/releases/download/${{ env.CHAINSAW_VERSION }}/chainsaw_linux_amd64.tar.gz"
           tar xzf chainsaw.tar.gz
           sudo mv chainsaw /usr/local/bin/
+
+      - name: Install kubeconform
+        run: |
+          curl -sSLo kubeconform.tar.gz \
+            "https://github.com/yannh/kubeconform/releases/download/${{ env.KUBECONFORM_VERSION }}/kubeconform-linux-amd64.tar.gz"
+          tar xzf kubeconform.tar.gz
+          sudo mv kubeconform /usr/local/bin/
 
       - name: Create Kind cluster
         uses: helm/kind-action@v1

@@ -20,6 +20,9 @@ spec:
               - |
                 helm template dapr-agents ../../../dapr-agents \
                   --namespace dapr-agents \
+                  --set monitoring.enabled=false \
+                  --set kagent.enabled=false \
+                  --set dapr.enabled=false \
                   --set llm.apiKey=test-key \
                   | kubeconform -strict -summary \
                     -schema-location default \

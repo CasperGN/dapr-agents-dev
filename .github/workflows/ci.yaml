@@ -77,6 +77,13 @@ jobs:
           tar xzf chainsaw.tar.gz
           sudo mv chainsaw /usr/local/bin/
 
+      - name: Install kubeconform
+        run: |
+          curl -sSLo kubeconform.tar.gz \
+            "https://github.com/yannh/kubeconform/releases/download/${{ env.KUBECONFORM_VERSION }}/kubeconform-linux-amd64.tar.gz"
+          tar xzf kubeconform.tar.gz
+          sudo mv kubeconform /usr/local/bin/
+
       - name: Create Kind cluster
         uses: helm/kind-action@v1
         with:
