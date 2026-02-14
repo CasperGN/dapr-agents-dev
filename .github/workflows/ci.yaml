@@ -49,7 +49,7 @@ jobs:
         run: make test-lint
 
       - name: Template validation (minimal - own templates only)
-        run: make test-templates
+        run: make test-template
 
   integration-test:
     name: Integration (${{ matrix.k8s-version }})
