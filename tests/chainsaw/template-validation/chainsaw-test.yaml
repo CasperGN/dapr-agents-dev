@@ -5,8 +5,10 @@ metadata:
 spec:
   description: Validate helm template renders valid Kubernetes manifests
   timeouts:
-    apply: 2m
-    assert: 2m
+    apply: 15m
+    assert: 15m
+    delete: 5m
+    exec: 15m
   steps:
     # Render with minimal config (own templates only, no sub-charts)
     - name: render-minimal
@@ -18,9 +20,6 @@ spec:
               - |
                 helm template dapr-agents ../../../dapr-agents \
                   --namespace dapr-agents \
-                  --set monitoring.enabled=false \
-                  --set kagent.enabled=false \
-                  --set dapr.enabled=false \
                   --set llm.apiKey=test-key \
                   | kubeconform -strict -summary \
                     -schema-location default \

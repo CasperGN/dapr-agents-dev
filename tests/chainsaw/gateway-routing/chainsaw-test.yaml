@@ -5,19 +5,17 @@ metadata:
 spec:
   description: Validate gateway subdomain routing works for all services
   timeouts:
-    apply: 10m
-    assert: 10m
+    apply: 15m
+    assert: 15m
     delete: 5m
+    exec: 15m
   steps:
     - name: install-full-stack
       try:
         - script:
             content: |
-              helm upgrade --install dapr-agents-routing ../../../dapr-agents \
+              helm upgrade --install dapr-agents ../../../dapr-agents \
                 --namespace $NAMESPACE \
-                --set monitoring.enabled=false \
-                --set kagent.enabled=false \
-                --set dapr.enabled=false \
                 --set llm.apiKey=ci-test-key \
                 --wait --timeout 10m
 
@@ -42,4 +40,4 @@ spec:
       try:
         - script:
             content: |
-              helm uninstall dapr-agents-routing --namespace $NAMESPACE
+              helm uninstall dapr-agents --namespace $NAMESPACE

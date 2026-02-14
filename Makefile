@@ -126,7 +126,7 @@ test-chainsaw:
 	@echo "### Running Chainsaw integration tests... ###"
 	@helm dependency update ./dapr-agents
 	@kind create cluster --name $(TEST_CLUSTER_NAME) --config $(TEST_KIND_CONFIG) || true
-	@chainsaw test tests/chainsaw/ --report-format JSON --report-name chainsaw-results --kube-context kind-$(TEST_CLUSTER_NAME); \
+	@chainsaw test tests/chainsaw/ --parallel 1 --report-format JSON --report-name chainsaw-results --kube-context kind-$(TEST_CLUSTER_NAME); \
 		exit_code=$$?; \
 		kind delete cluster --name $(TEST_CLUSTER_NAME); \
 		exit $$exit_code

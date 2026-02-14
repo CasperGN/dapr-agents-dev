@@ -104,9 +104,9 @@ spec:
       labels:
         app: gateway
     spec:
-      # Pin to control-plane node where hostPort 80 is mapped
+      # Pin to control-plane node where extraPortMappings are configured
       nodeSelector:
-        kubernetes.io/hostname: dapr-agents-control-plane
+        node-role.kubernetes.io/control-plane: ""
       tolerations:
       - key: node-role.kubernetes.io/control-plane
         operator: Exists
