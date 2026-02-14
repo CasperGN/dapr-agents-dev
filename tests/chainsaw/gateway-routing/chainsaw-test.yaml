@@ -6,21 +6,32 @@ spec:
   description: Validate gateway subdomain routing works for all services
   namespace: dapr-agents
   timeouts:
-    assert: 15m
+    assert: 2m
     exec: 15m
   steps:
     - name: check-subdomains
       try:
         - script:
             content: |
-              PORT=$(kubectl get svc gateway -n dapr-agents -o jsonpath='{.spec.ports[0].nodePort}')
-              echo "Testing via NodePort: $PORT"
-
-              echo "Checking Diagrid Dashboard..."
-              curl -s -H "Host: diagrid.localhost" http://localhost:$PORT | grep -i "diagrid"
-
-              echo "Checking Redis Insight..."
-              curl -s -H "Host: redis.localhost" http://localhost:$PORT | grep -i "redis"
+              # Kind maps NodePort 30080 -> hostPort 9080
+              PORT=9080
+              echo "Testing via host port: $PORT"
 
               echo "Checking default landing page..."
-              curl -s http://localhost:$PORT | grep "dapr-agents gateway"
+              BODY=$(curl -sf http://localhost:$PORT)
+              echo "$BODY"
+              echo "$BODY" | grep "dapr-agents gateway"
+
+              echo "Checking Kagent UI routing (HTTP 200)..."
+              curl -sf -o /dev/null http://kagent.localhost:$PORT
+
+              echo "Checking Grafana routing (HTTP 200)..."
+              curl -sf -o /dev/null http://grafana.localhost:$PORT
+
+              echo "Checking Redis Insight routing (HTTP 200)..."
+              curl -sf -o /dev/null http://redis.localhost:$PORT
+
+              echo "Checking Diagrid Dashboard routing (HTTP 200)..."
+              curl -sf -o /dev/null http://diagrid.localhost:$PORT
+
+              echo "All gateway routes OK"

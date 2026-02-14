@@ -6,3 +6,6 @@ __pycache__/
 *.tgz
 Chart.lock
 *.json
+
+# Generated test artifacts
+tests/chainsaw/template-validation/full-template.yaml

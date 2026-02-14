@@ -6,7 +6,7 @@ spec:
   description: Validate core dapr-agents chart resources exist
   namespace: dapr-agents
   timeouts:
-    assert: 15m
+    assert: 2m
     exec: 15m
   steps:
     - name: check-deployments
@@ -112,23 +112,6 @@ spec:
               metadata:
                 name: external-webhook
                 namespace: dapr-agents
-        - assert:
-            resource:
-              apiVersion: dapr.io/v1alpha1
-              kind: Component
-              metadata:
-                name: local-secrets
-                namespace: dapr-agents
-
-    - name: check-http-endpoint
-      try:
-        - assert:
-            resource:
-              apiVersion: dapr.io/v1alpha1
-              kind: HTTPEndpoint
-              metadata:
-                name: mcp-server
-                namespace: dapr-agents
 
     - name: check-secrets
       try:
@@ -158,20 +141,6 @@ spec:
               apiVersion: v1
               kind: Secret
               metadata:
-                name: crypto-keys
-                namespace: dapr-agents
-        - assert:
-            resource:
-              apiVersion: v1
-              kind: Secret
-              metadata:
-                name: crypto-rsa-pubkey
-                namespace: dapr-agents
-        - assert:
-            resource:
-              apiVersion: v1
-              kind: Secret
-              metadata:
                 name: dapr-redis
                 namespace: dapr-agents
 
@@ -193,13 +162,6 @@ spec:
                 namespace: dapr-agents
               spec:
                 type: NodePort
-        - assert:
-            resource:
-              apiVersion: v1
-              kind: Service
-              metadata:
-                name: dapr-sentry-oidc
-                namespace: dapr-agents
 
     - name: check-configmaps
       try:

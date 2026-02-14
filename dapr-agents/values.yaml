@@ -41,6 +41,10 @@ loki:
 
 tempo:
   enabled: true
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
 
 kube-prometheus-stack:
   enabled: true
@@ -52,10 +56,29 @@ kube-prometheus-stack:
     prometheusSpec:
       serviceMonitorSelectorNilUsesHelmValues: false
       podMonitorSelectorNilUsesHelmValues: false
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+  alertmanager:
+    alertmanagerSpec:
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+  kube-state-metrics:
+    tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
   grafana:
     enabled: true
     adminUser: admin
     adminPassword: admin
+    tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
     grafana.ini:
       server:
         domain: grafana.localhost
@@ -78,6 +101,10 @@ kube-prometheus-stack:
 opentelemetry-collector:
   enabled: true
   mode: deployment
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
   image:
     repository: otel/opentelemetry-collector-contrib
     tag: "0.145.0"

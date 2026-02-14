@@ -6,7 +6,7 @@ spec:
   description: Validate helm template renders valid Kubernetes manifests
   timeouts:
     apply: 15m
-    assert: 15m
+    assert: 2m
     delete: 5m
     exec: 15m
   steps:
@@ -18,6 +18,12 @@ spec:
             args:
               - -c
               - |
+                SKIP="CustomResourceDefinition"
+                SKIP="$SKIP,Component,HTTPEndpoint"
+                SKIP="$SKIP,Agent,Memory,ModelConfig"
+                SKIP="$SKIP,RemoteMCPServer,ToolServer"
+                SKIP="$SKIP,MCPServer,Configuration"
+
                 helm template dapr-agents ../../../dapr-agents \
                   --namespace dapr-agents \
                   --set monitoring.enabled=false \
@@ -26,9 +32,9 @@ spec:
                   --set llm.apiKey=test-key \
                   | kubeconform -strict -summary \
                     -schema-location default \
-                    -skip CustomResourceDefinition,Component,HTTPEndpoint,Agent,Memory,ModelConfig,RemoteMCPServer,ToolServer,MCPServer,Configuration
+                    -skip "$SKIP"
 
-    # Render with dapr enabled (includes Dapr CRDs and Components)
+    # Render with dapr enabled
     - name: render-with-dapr
       try:
         - command:
@@ -36,6 +42,12 @@ spec:
             args:
               - -c
               - |
+                SKIP="CustomResourceDefinition"
+                SKIP="$SKIP,Component,HTTPEndpoint"
+                SKIP="$SKIP,Agent,Memory,ModelConfig"
+                SKIP="$SKIP,RemoteMCPServer,ToolServer"
+                SKIP="$SKIP,MCPServer,Configuration"
+
                 helm template dapr-agents ../../../dapr-agents \
                   --namespace dapr-agents \
                   --set monitoring.enabled=false \
@@ -43,7 +55,7 @@ spec:
                   --set llm.apiKey=test-key \
                   | kubeconform -strict -summary \
                     -schema-location default \
-                    -skip CustomResourceDefinition,Component,HTTPEndpoint,Agent,Memory,ModelConfig,RemoteMCPServer,ToolServer,MCPServer,Configuration
+                    -skip "$SKIP"
 
     # Render with full values (all features enabled)
     - name: render-full
@@ -53,15 +65,26 @@ spec:
             args:
               - -c
               - |
+                SKIP="CustomResourceDefinition"
+                SKIP="$SKIP,Component,HTTPEndpoint"
+                SKIP="$SKIP,ServiceMonitor,Alertmanager"
+                SKIP="$SKIP,AlertmanagerConfig,PodMonitor"
+                SKIP="$SKIP,Probe,PrometheusAgent"
+                SKIP="$SKIP,Prometheus,PrometheusRule"
+                SKIP="$SKIP,ScrapeConfig,ThanosRuler"
+                SKIP="$SKIP,Agent,Memory,ModelConfig"
+                SKIP="$SKIP,RemoteMCPServer,ToolServer"
+                SKIP="$SKIP,MCPServer,Configuration"
+
                 helm template dapr-agents ../../../dapr-agents \
                   --namespace dapr-agents \
-                  --set llm.apiKey=test-key > full-template.yaml
-                
-                # Validate manifests
+                  --set llm.apiKey=test-key \
+                  > full-template.yaml
+
                 kubeconform -strict -summary \
                   -schema-location default \
-                  -skip CustomResourceDefinition,Component,HTTPEndpoint,ServiceMonitor,Alertmanager,AlertmanagerConfig,PodMonitor,Probe,PrometheusAgent,Prometheus,PrometheusRule,ScrapeConfig,ThanosRuler,Agent,Memory,ModelConfig,RemoteMCPServer,ToolServer,MCPServer,Configuration < full-template.yaml
-                
+                  -skip "$SKIP" < full-template.yaml
+
                 # Verify gateway subdomain links
                 grep "kagent.localhost" full-template.yaml
                 grep "grafana.localhost" full-template.yaml
