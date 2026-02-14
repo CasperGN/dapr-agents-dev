@@ -87,7 +87,7 @@ jobs:
       - name: Create Kind cluster
         uses: helm/kind-action@v1
         with:
-          cluster_name: release-dapr-agents
+          cluster_name: dapr-agents-test
           config: tests/kind-config-test.yaml
 
       - name: Helm dependency update
