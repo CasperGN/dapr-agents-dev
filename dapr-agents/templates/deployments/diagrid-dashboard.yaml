@@ -1,0 +1,56 @@
+{{- if .Values.diagridDashboard.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: diagrid-dashboard
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "dapr-agents.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: diagrid-dashboard
+  template:
+    metadata:
+      labels:
+        app: diagrid-dashboard
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "diagrid-dashboard"
+        dapr.io/app-port: "8080"
+    spec:
+      containers:
+      - name: diagrid-dashboard
+        image: "public.ecr.aws/diagrid-dev/diagrid-dashboard:latest"
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: REDIS_HOST
+          value: {{ printf "%s.%s.svc.cluster.local:6379" .Values.redisConfig.serviceName .Release.Namespace | quote }}
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.redisConfig.passwordSecret.name }}
+              key: {{ .Values.redisConfig.passwordSecret.key }}
+        ports:
+        - containerPort: 8080
+          name: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: diagrid-dashboard
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "dapr-agents.labels" . | nindent 4 }}
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: {{ .Values.diagridDashboard.service.nodePort }}
+    protocol: TCP
+    name: http
+  selector:
+    app: diagrid-dashboard
+{{- end }}

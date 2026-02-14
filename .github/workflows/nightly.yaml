@@ -1,0 +1,61 @@
+name: Nightly Full Stack
+
+on:
+  schedule:
+    - cron: "0 3 * * 1-5"  # 03:00 UTC weekdays
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  HELM_VERSION: "3.17.0"
+  CHAINSAW_VERSION: "v0.2.12"
+
+jobs:
+  full-stack-test:
+    name: Full Stack Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: ${{ env.HELM_VERSION }}
+
+      - name: Install Chainsaw
+        run: |
+          curl -sSLo chainsaw.tar.gz \
+            "https://github.com/kyverno/chainsaw/releases/download/${{ env.CHAINSAW_VERSION }}/chainsaw_linux_amd64.tar.gz"
+          tar xzf chainsaw.tar.gz
+          sudo mv chainsaw /usr/local/bin/
+
+      - name: Create Kind cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: nightly-dapr-agents
+          config: kind-config.yaml
+
+      - name: Helm dependency update
+        run: helm dependency update ./dapr-agents
+
+      - name: Install full stack
+        run: |
+          helm upgrade --install dapr-agents ./dapr-agents \
+            --namespace dapr-agents \
+            --create-namespace \
+            --set llm.apiKey=nightly-test-key \
+            --wait \
+            --timeout 15m
+
+      - name: Run Chainsaw tests
+        run: chainsaw test tests/chainsaw/core-install/ --report-format JSON --report-name nightly-results
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-results
+          path: nightly-results.json

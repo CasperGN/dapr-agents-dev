@@ -1,0 +1,67 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: template-validation
+spec:
+  description: Validate helm template renders valid Kubernetes manifests
+  timeouts:
+    apply: 2m
+    assert: 2m
+  steps:
+    # Render with minimal config (own templates only, no sub-charts)
+    - name: render-minimal
+      try:
+        - command:
+            entrypoint: bash
+            args:
+              - -c
+              - |
+                helm template dapr-agents ../../../dapr-agents \
+                  --namespace dapr-agents \
+                  --set monitoring.enabled=false \
+                  --set kagent.enabled=false \
+                  --set dapr.enabled=false \
+                  --set llm.apiKey=test-key \
+                  | kubeconform -strict -summary \
+                    -schema-location default \
+                    -skip CustomResourceDefinition,Component,HTTPEndpoint,Agent,Memory,ModelConfig,RemoteMCPServer,ToolServer,MCPServer,Configuration
+
+    # Render with dapr enabled (includes Dapr CRDs and Components)
+    - name: render-with-dapr
+      try:
+        - command:
+            entrypoint: bash
+            args:
+              - -c
+              - |
+                helm template dapr-agents ../../../dapr-agents \
+                  --namespace dapr-agents \
+                  --set monitoring.enabled=false \
+                  --set kagent.enabled=false \
+                  --set llm.apiKey=test-key \
+                  | kubeconform -strict -summary \
+                    -schema-location default \
+                    -skip CustomResourceDefinition,Component,HTTPEndpoint,Agent,Memory,ModelConfig,RemoteMCPServer,ToolServer,MCPServer,Configuration
+
+    # Render with full values (all features enabled)
+    - name: render-full
+      try:
+        - command:
+            entrypoint: bash
+            args:
+              - -c
+              - |
+                helm template dapr-agents ../../../dapr-agents \
+                  --namespace dapr-agents \
+                  --set llm.apiKey=test-key > full-template.yaml
+                
+                # Validate manifests
+                kubeconform -strict -summary \
+                  -schema-location default \
+                  -skip CustomResourceDefinition,Component,HTTPEndpoint,ServiceMonitor,Alertmanager,AlertmanagerConfig,PodMonitor,Probe,PrometheusAgent,Prometheus,PrometheusRule,ScrapeConfig,ThanosRuler,Agent,Memory,ModelConfig,RemoteMCPServer,ToolServer,MCPServer,Configuration < full-template.yaml
+                
+                # Verify gateway subdomain links
+                grep "kagent.localhost" full-template.yaml
+                grep "grafana.localhost" full-template.yaml
+                grep "redis.localhost" full-template.yaml
+                grep "diagrid.localhost" full-template.yaml

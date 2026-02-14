@@ -1,0 +1,125 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "dapr-agents/**"
+      - "tests/**"
+      - ".github/workflows/ci.yaml"
+  push:
+    branches: [main]
+    paths:
+      - "dapr-agents/**"
+      - "tests/**"
+      - ".github/workflows/ci.yaml"
+
+permissions:
+  contents: read
+
+env:
+  HELM_VERSION: "3.17.0"
+  CHAINSAW_VERSION: "v0.2.12"
+  KUBECONFORM_VERSION: "v0.6.7"
+
+jobs:
+  lint-and-validate:
+    name: Lint & Validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: ${{ env.HELM_VERSION }}
+
+      - name: Install kubeconform
+        run: |
+          curl -sSLo kubeconform.tar.gz \
+            "https://github.com/yannh/kubeconform/releases/download/${{ env.KUBECONFORM_VERSION }}/kubeconform-linux-amd64.tar.gz"
+          tar xzf kubeconform.tar.gz
+          sudo mv kubeconform /usr/local/bin/
+
+      - name: Helm dependency update
+        run: helm dependency update ./dapr-agents
+
+      - name: Helm lint (minimal)
+        run: |
+          helm lint ./dapr-agents \
+            --set llm.apiKey=lint-key \
+            --set monitoring.enabled=false \
+            --set kagent.enabled=false
+
+      - name: Helm lint (full)
+        run: helm lint ./dapr-agents --set llm.apiKey=lint-key
+
+      - name: Template validation (minimal - own templates only)
+        run: |
+          helm template dapr-agents ./dapr-agents \
+            --namespace dapr-agents \
+            --set monitoring.enabled=false \
+            --set kagent.enabled=false \
+            --set dapr.enabled=false \
+            --set llm.apiKey=test-key \
+            | kubeconform -strict -summary \
+              -schema-location default \
+              -skip CustomResourceDefinition
+
+      - name: Template validation (with dapr)
+        run: |
+          helm template dapr-agents ./dapr-agents \
+            --namespace dapr-agents \
+            --set monitoring.enabled=false \
+            --set kagent.enabled=false \
+            --set llm.apiKey=test-key \
+            | kubeconform -strict -summary \
+              -schema-location default \
+              -skip CustomResourceDefinition,Component,HTTPEndpoint
+
+  integration-test:
+    name: Integration (${{ matrix.k8s-version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: lint-and-validate
+    strategy:
+      fail-fast: false
+      matrix:
+        k8s-version:
+          - v1.31.4
+          - v1.32.3
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: ${{ env.HELM_VERSION }}
+
+      - name: Install Chainsaw
+        run: |
+          curl -sSLo chainsaw.tar.gz \
+            "https://github.com/kyverno/chainsaw/releases/download/${{ env.CHAINSAW_VERSION }}/chainsaw_linux_amd64.tar.gz"
+          tar xzf chainsaw.tar.gz
+          sudo mv chainsaw /usr/local/bin/
+
+      - name: Create Kind cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: ci-dapr-agents
+          node_image: "kindest/node:${{ matrix.k8s-version }}"
+          config: tests/ci/kind-config-ci.yaml
+
+      - name: Helm dependency update
+        run: helm dependency update ./dapr-agents
+
+      - name: Run Chainsaw core-install tests
+        run: chainsaw test tests/chainsaw/core-install/ --report-format JSON --report-name core-install-results
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chainsaw-results-${{ matrix.k8s-version }}
+          path: core-install-results.json

@@ -1,0 +1,45 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: gateway-routing
+spec:
+  description: Validate gateway subdomain routing works for all services
+  timeouts:
+    apply: 10m
+    assert: 10m
+    delete: 5m
+  steps:
+    - name: install-full-stack
+      try:
+        - script:
+            content: |
+              helm upgrade --install dapr-agents-routing ../../../dapr-agents-routing \
+                --namespace $NAMESPACE \
+                --set llm.apiKey=ci-test-key \
+                --wait --timeout 10m
+
+    - name: check-subdomains
+      try:
+        - script:
+            content: |
+              # Get the node port of the test gateway
+              PORT=$(kubectl get svc gateway -n $NAMESPACE -o jsonpath='{.spec.ports[0].nodePort}')
+              echo "Testing via NodePort: $PORT"
+
+              echo "Checking Kagent..."
+              curl -s -H "Host: kagent.localhost" http://localhost:$PORT | grep -i "kagent"
+              
+              echo "Checking Diagrid Dashboard..."
+              curl -s -H "Host: diagrid.localhost" http://localhost:$PORT | grep -i "diagrid"
+              
+              echo "Checking Redis Insight..."
+              curl -s -H "Host: redis.localhost" http://localhost:$PORT | grep -i "redis"
+              
+              echo "Checking Grafana..."
+              curl -sI -H "Host: grafana.localhost" http://localhost:$PORT | grep -E "HTTP/1.1 200|HTTP/1.1 302"
+
+    - name: cleanup
+      try:
+        - script:
+            content: |
+              helm uninstall dapr-agents-routing --namespace $NAMESPACE

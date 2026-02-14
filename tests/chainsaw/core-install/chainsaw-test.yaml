@@ -1,0 +1,254 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: core-install
+spec:
+  description: Validate core dapr-agents-core chart resources install correctly
+  timeouts:
+    apply: 5m
+    assert: 5m
+    delete: 3m
+  steps:
+    # Step 1: Install chart with lightweight profile (no monitoring, no kagent)
+    - name: install-chart
+      try:
+        - script:
+            content: |
+              helm upgrade --install dapr-agents-core ../../../dapr-agents \
+                --namespace $NAMESPACE \
+                --set monitoring.enabled=false \
+                --set kagent.enabled=false \
+                --set llm.apiKey=ci-test-key \
+                --wait --timeout 5m
+
+    # Step 2: Assert Deployments exist
+    - name: check-deployments
+      try:
+        - assert:
+            resource:
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                name: dapr-redis
+                namespace: ($NAMESPACE)
+        - assert:
+            resource:
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                name: gateway
+                namespace: ($NAMESPACE)
+        - assert:
+            resource:
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                name: diagrid-dashboard
+                namespace: ($NAMESPACE)
+        - assert:
+            resource:
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                name: redisinsight
+                namespace: ($NAMESPACE)
+
+    # Step 4: Assert all Dapr Components exist
+    - name: check-dapr-components
+      try:
+        - assert:
+            resource:
+              apiVersion: dapr.io/v1alpha1
+              kind: Component
+              metadata:
+                name: statestore
+                namespace: ($NAMESPACE)
+        - assert:
+            resource:
+              apiVersion: dapr.io/v1alpha1
+              kind: Component
+              metadata:
+                name: pubsub
+                namespace: ($NAMESPACE)
+        - assert:
+            resource:
+              apiVersion: dapr.io/v1alpha1
+              kind: Component
+              metadata:
+                name: agent-pubsub
+                namespace: ($NAMESPACE)
+        - assert:
+            resource:
+              apiVersion: dapr.io/v1alpha1
+              kind: Component
+              metadata:
+                name: agent-memory
+                namespace: ($NAMESPACE)
+        - assert:
+            resource:
+              apiVersion: dapr.io/v1alpha1
+              kind: Component
+              metadata:
+                name: agent-registry
+                namespace: ($NAMESPACE)
+        - assert:
+            resource:
+              apiVersion: dapr.io/v1alpha1
+              kind: Component
+              metadata:
+                name: agent-runtimestatestore
+                namespace: ($NAMESPACE)
+        - assert:
+            resource:
+              apiVersion: dapr.io/v1alpha1
+              kind: Component
+              metadata:
+                name: agent-workflow
+                namespace: ($NAMESPACE)
+        - assert:
+            resource:
+              apiVersion: dapr.io/v1alpha1
+              kind: Component
+              metadata:
+                name: lockstore-redis
+                namespace: ($NAMESPACE)
+        - assert:
+            resource:
+              apiVersion: dapr.io/v1alpha1
+              kind: Component
+              metadata:
+                name: llm-provider
+                namespace: ($NAMESPACE)
+        - assert:
+            resource:
+              apiVersion: dapr.io/v1alpha1
+              kind: Component
+              metadata:
+                name: external-webhook
+                namespace: ($NAMESPACE)
+        - assert:
+            resource:
+              apiVersion: dapr.io/v1alpha1
+              kind: Component
+              metadata:
+                name: local-secrets
+                namespace: ($NAMESPACE)
+
+    # Step 5: Assert HTTPEndpoint resource
+    - name: check-http-endpoint
+      try:
+        - assert:
+            resource:
+              apiVersion: dapr.io/v1alpha1
+              kind: HTTPEndpoint
+              metadata:
+                name: mcp-server
+                namespace: ($NAMESPACE)
+
+    # Step 6: Assert Secrets exist
+    - name: check-secrets
+      try:
+        - assert:
+            resource:
+              apiVersion: v1
+              kind: Secret
+              metadata:
+                name: llm-secret
+                namespace: ($NAMESPACE)
+        - assert:
+            resource:
+              apiVersion: v1
+              kind: Secret
+              metadata:
+                name: kagent-openai
+                namespace: ($NAMESPACE)
+        - assert:
+            resource:
+              apiVersion: v1
+              kind: Secret
+              metadata:
+                name: app-secrets
+                namespace: ($NAMESPACE)
+        - assert:
+            resource:
+              apiVersion: v1
+              kind: Secret
+              metadata:
+                name: crypto-keys
+                namespace: ($NAMESPACE)
+        - assert:
+            resource:
+              apiVersion: v1
+              kind: Secret
+              metadata:
+                name: crypto-rsa-pubkey
+                namespace: ($NAMESPACE)
+        - assert:
+            resource:
+              apiVersion: v1
+              kind: Secret
+              metadata:
+                name: dapr-redis
+                namespace: ($NAMESPACE)
+
+    # Step 7: Assert Services exist
+    - name: check-services
+      try:
+        - assert:
+            resource:
+              apiVersion: v1
+              kind: Service
+              metadata:
+                name: dapr-redis-master
+                namespace: ($NAMESPACE)
+        - assert:
+            resource:
+              apiVersion: v1
+              kind: Service
+              metadata:
+                name: gateway
+                namespace: ($NAMESPACE)
+              spec:
+                type: NodePort
+        - assert:
+            resource:
+              apiVersion: v1
+              kind: Service
+              metadata:
+                name: dapr-sentry-oidc
+                namespace: ($NAMESPACE)
+
+    # Step 8: Assert ConfigMap exists
+    - name: check-configmaps
+      try:
+        - assert:
+            resource:
+              apiVersion: v1
+              kind: ConfigMap
+              metadata:
+                name: local-registry-hosting
+                namespace: ($NAMESPACE)
+        - assert:
+            resource:
+              apiVersion: v1
+              kind: ConfigMap
+              metadata:
+                name: gateway-config
+                namespace: ($NAMESPACE)
+
+    # Step 9: Verify Gateway Connectivity
+    - name: check-gateway-connectivity
+      try:
+        - script:
+            content: |
+              # Get the node port of the test gateway
+              PORT=$(kubectl get svc gateway -n ($NAMESPACE) -o jsonpath='{.spec.ports[0].nodePort}')
+              curl -s http://localhost:$PORT | grep "dapr-agents-core gateway (Subdomains)"
+
+    # Step 10: Cleanup
+    - name: cleanup
+      try:
+        - script:
+            content: |
+              helm uninstall dapr-agents-core --namespace $NAMESPACE
+
