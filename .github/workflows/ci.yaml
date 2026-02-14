@@ -80,7 +80,6 @@ jobs:
       - name: Create Kind cluster
         uses: helm/kind-action@v1
         with:
-          cluster_name: ci-dapr-agents
           node_image: "kindest/node:${{ matrix.k8s-version }}"
           config: tests/kind-config-test.yaml
 
