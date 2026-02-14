@@ -82,7 +82,7 @@ jobs:
         with:
           cluster_name: ci-dapr-agents
           node_image: "kindest/node:${{ matrix.k8s-version }}"
-          config: tests/ci/kind-config-ci.yaml
+          config: tests/kind-config-test.yaml
 
       - name: Helm dependency update
         run: helm dependency update ./dapr-agents

@@ -36,7 +36,7 @@ jobs:
         uses: helm/kind-action@v1
         with:
           cluster_name: nightly-dapr-agents
-          config: kind-config.yaml
+          config: tests/kind-config-test.yaml
 
       - name: Helm dependency update
         run: helm dependency update ./dapr-agents
