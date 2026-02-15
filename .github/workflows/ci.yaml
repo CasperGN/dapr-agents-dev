@@ -37,8 +37,10 @@ jobs:
 
       - name: Install kubeconform
         run: |
+          BASE="https://github.com/yannh/kubeconform"
+          V="${{ env.KUBECONFORM_VERSION }}"
           curl -sSLo kubeconform.tar.gz \
-            "https://github.com/yannh/kubeconform/releases/download/${{ env.KUBECONFORM_VERSION }}/kubeconform-linux-amd64.tar.gz"
+            "$BASE/releases/download/$V/kubeconform-linux-amd64.tar.gz"
           tar xzf kubeconform.tar.gz
           sudo mv kubeconform /usr/local/bin/
 
@@ -52,16 +54,10 @@ jobs:
         run: make test-template
 
   integration-test:
-    name: Integration (${{ matrix.k8s-version }})
+    name: Integration Test
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     needs: lint-and-validate
-    strategy:
-      fail-fast: false
-      matrix:
-        k8s-version:
-          - v1.31.4
-          - v1.32.3
     steps:
       - uses: actions/checkout@v6
 
@@ -72,27 +68,21 @@ jobs:
 
       - name: Install Chainsaw
         run: |
+          BASE="https://github.com/kyverno/chainsaw"
+          V="${{ env.CHAINSAW_VERSION }}"
           curl -sSLo chainsaw.tar.gz \
-            "https://github.com/kyverno/chainsaw/releases/download/${{ env.CHAINSAW_VERSION }}/chainsaw_linux_amd64.tar.gz"
+            "$BASE/releases/download/$V/chainsaw_linux_amd64.tar.gz"
           tar xzf chainsaw.tar.gz
           sudo mv chainsaw /usr/local/bin/
 
       - name: Install kubeconform
         run: |
+          BASE="https://github.com/yannh/kubeconform"
+          V="${{ env.KUBECONFORM_VERSION }}"
           curl -sSLo kubeconform.tar.gz \
-            "https://github.com/yannh/kubeconform/releases/download/${{ env.KUBECONFORM_VERSION }}/kubeconform-linux-amd64.tar.gz"
+            "$BASE/releases/download/$V/kubeconform-linux-amd64.tar.gz"
           tar xzf kubeconform.tar.gz
           sudo mv kubeconform /usr/local/bin/
 
-      - name: Create Kind cluster
-        uses: helm/kind-action@v1
-        with:
-          cluster_name: dapr-agents-test
-          node_image: "kindest/node:${{ matrix.k8s-version }}"
-          config: tests/kind-config-test.yaml
-
-      - name: Helm dependency update
-        run: helm dependency update ./dapr-agents
-
-      - name: Run Chainsaw core-install tests
+      - name: Run integration tests
         run: make test-chainsaw

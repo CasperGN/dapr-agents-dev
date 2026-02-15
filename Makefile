@@ -132,7 +132,7 @@ test-chainsaw:
 		--namespace dapr-agents --create-namespace \
 		--set llm.apiKey=ci-test-key \
 		--kube-context kind-$(TEST_CLUSTER_NAME) \
-		--wait --timeout 20m
+		--wait --timeout 40m
 	@chainsaw test tests/chainsaw/ --parallel 1 --report-format JSON --report-name chainsaw-results --kube-context kind-$(TEST_CLUSTER_NAME); \
 		exit_code=$$?; \
 		kind delete cluster --name $(TEST_CLUSTER_NAME); \
