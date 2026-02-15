@@ -67,7 +67,7 @@ jobs:
   full-test:
     name: Full Stack Test
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     needs: detect-version
     if: needs.detect-version.outputs.should_release == 'true'
     steps:
