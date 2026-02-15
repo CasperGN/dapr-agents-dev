@@ -1,9 +1,35 @@
 apiVersion: v2
 name: dapr-agents
-description: A Helm chart for deploying Dapr Agents
+description: A comprehensive developer stack for working with Dapr, Monitoring, and AI Agents.
 type: application
-version: 0.1.1
+version: 0.1.2
 appVersion: "0.1.1"
+home: https://github.com/caspergn/dapr-agents-dev
+sources:
+  - https://github.com/caspergn/dapr-agents-dev
+keywords:
+  - dapr
+  - agents
+  - ai
+  - monitoring
+  - otel
+  - kagent
+maintainers:
+  - name: CasperGN
+    email: casper@diagrid.io
+annotations:
+  artifacthub.io/displayName: Dapr Agents Stack
+  artifacthub.io/category: ai-machine-learning
+  artifacthub.io/changes: |
+    - kind: added
+      description: Initial release of the Dapr Agents Stack Helm chart.
+  artifacthub.io/links: |
+    - name: GitHub
+      url: https://github.com/caspergn/dapr-agents-dev
+    - name: Dapr Documentation
+      url: https://docs.dapr.io/
+    - name: Kagent Documentation
+      url: https://kagent.dev/
 dependencies:
   - name: loki
     version: 6.53.0
