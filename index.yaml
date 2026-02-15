@@ -1,9 +1,71 @@
 apiVersion: v1
 entries:
   dapr-agents:
+  - annotations:
+      artifacthub.io/category: ai-machine-learning
+      artifacthub.io/changes: |
+        - kind: added
+          description: Initial release of the Dapr Agents Stack Helm chart.
+      artifacthub.io/displayName: Dapr Agents Stack
+      artifacthub.io/links: |
+        - name: GitHub
+          url: https://github.com/caspergn/dapr-agents-dev
+        - name: Dapr Documentation
+          url: https://docs.dapr.io/
+        - name: Kagent Documentation
+          url: https://kagent.dev/
+    apiVersion: v2
+    appVersion: 0.1.1
+    created: "2026-02-15T20:16:07.65628187Z"
+    dependencies:
+    - condition: monitoring.enabled
+      name: loki
+      repository: https://grafana.github.io/helm-charts
+      version: 6.53.0
+    - condition: monitoring.enabled
+      name: tempo
+      repository: https://grafana.github.io/helm-charts
+      version: 1.24.4
+    - condition: monitoring.enabled
+      name: kube-prometheus-stack
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 81.6.9
+    - condition: monitoring.enabled
+      name: opentelemetry-collector
+      repository: https://open-telemetry.github.io/opentelemetry-helm-charts
+      version: 0.145.0
+    - condition: dapr.enabled
+      name: dapr
+      repository: https://dapr.github.io/helm-charts/
+      version: 1.17.0-rc.3
+    - condition: kagent.enabled
+      name: kagent
+      repository: oci://ghcr.io/kagent-dev/kagent/helm
+      version: 0.7.14
+    description: A comprehensive developer stack for working with Dapr, Monitoring,
+      and AI Agents.
+    digest: 784d1c3223f2e1f31a0b209f263baac6e5d9656ecf9f20a37f7f4a6a3168b4db
+    home: https://github.com/caspergn/dapr-agents-dev
+    keywords:
+    - dapr
+    - agents
+    - ai
+    - monitoring
+    - otel
+    - kagent
+    maintainers:
+    - email: casper@diagrid.io
+      name: CasperGN
+    name: dapr-agents
+    sources:
+    - https://github.com/caspergn/dapr-agents-dev
+    type: application
+    urls:
+    - https://caspergn.github.io/dapr-agents-dev/dapr-agents-0.1.2.tgz
+    version: 0.1.2
   - apiVersion: v2
     appVersion: 0.1.1
-    created: "2026-02-15T11:24:49.276704721Z"
+    created: "2026-02-15T20:16:07.599377679Z"
     dependencies:
     - condition: monitoring.enabled
       name: loki
@@ -36,4 +98,4 @@ entries:
     urls:
     - https://caspergn.github.io/dapr-agents-dev/dapr-agents-0.1.1.tgz
     version: 0.1.1
-generated: "2026-02-15T11:24:49.221474904Z"
+generated: "2026-02-15T20:16:07.544866943Z"
