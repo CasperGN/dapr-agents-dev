@@ -152,13 +152,6 @@ spec:
               apiVersion: v1
               kind: Secret
               metadata:
-                name: app-secrets
-                namespace: dapr-agents
-        - assert:
-            resource:
-              apiVersion: v1
-              kind: Secret
-              metadata:
                 name: dapr-redis
                 namespace: dapr-agents
 

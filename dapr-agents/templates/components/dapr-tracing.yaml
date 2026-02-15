@@ -1,0 +1,16 @@
+{{- if .Values.opentelemetry.enabled }}
+apiVersion: dapr.io/v1alpha1
+kind: Configuration
+metadata:
+  name: dapr-tracing
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "dapr-agents.labels" . | nindent 4 }}
+spec:
+  tracing:
+    samplingRate: "1"
+    otel:
+      endpointAddress: {{ .Values.opentelemetry.endpoint }}
+      isSecure: false
+      protocol: {{ .Values.opentelemetry.protocol }}
+{{- end }}

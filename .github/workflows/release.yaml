@@ -142,8 +142,10 @@ jobs:
 
       - name: Push chart to OCI registry
         run: |
+          OWNER=$(echo "${{ github.repository_owner }}" \
+            | tr '[:upper:]' '[:lower:]')
           helm push dapr-agents-${{ needs.detect-version.outputs.version }}.tgz \
-            oci://${{ env.REGISTRY }}/${{ github.repository_owner }}/charts
+            oci://${{ env.REGISTRY }}/$OWNER/charts
 
       - name: Create git tag
         run: |

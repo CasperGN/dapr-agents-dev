@@ -24,3 +24,19 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 app.kubernetes.io/name: {{ .Chart.Name }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
+
+{{- define "dapr-agents.redis-host" -}}
+{{ printf "%s.%s.svc.cluster.local:6379" .Values.redisConfig.serviceName .Release.Namespace }}
+{{- end -}}
+
+{{- define "dapr-agents.state-redis-spec" -}}
+type: state.redis
+version: v1
+metadata:
+- name: redisHost
+  value: {{ include "dapr-agents.redis-host" . }}
+- name: redisPassword
+  secretKeyRef:
+    name: {{ .Values.redisConfig.passwordSecret.name }}
+    key: {{ .Values.redisConfig.passwordSecret.key }}
+{{- end -}}

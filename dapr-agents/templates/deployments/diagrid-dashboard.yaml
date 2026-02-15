@@ -1,4 +1,30 @@
 {{- if .Values.diagridDashboard.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: diagrid-dashboard-state
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "dapr-agents.labels" . | nindent 4 }}
+data:
+  state.yaml: |
+    apiVersion: dapr.io/v1alpha1
+    kind: Component
+    metadata:
+      name: statestore
+    spec:
+      type: state.redis
+      version: v1
+      metadata:
+      - name: redisHost
+        value: {{ include "dapr-agents.redis-host" . }}
+      - name: redisPassword
+        value: {{ .Values.redis.password | quote }}
+      - name: keyPrefix
+        value: none
+      - name: actorStateStore
+        value: "true"
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,26 +41,25 @@ spec:
     metadata:
       labels:
         app: diagrid-dashboard
-      annotations:
-        dapr.io/enabled: "true"
-        dapr.io/app-id: "diagrid-dashboard"
-        dapr.io/app-port: "8080"
     spec:
       containers:
       - name: diagrid-dashboard
         image: "public.ecr.aws/diagrid-dev/diagrid-dashboard:latest"
         imagePullPolicy: IfNotPresent
         env:
-        - name: REDIS_HOST
-          value: {{ printf "%s.%s.svc.cluster.local:6379" .Values.redisConfig.serviceName .Release.Namespace | quote }}
-        - name: REDIS_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.redisConfig.passwordSecret.name }}
-              key: {{ .Values.redisConfig.passwordSecret.key }}
+        - name: COMPONENT_FILE
+          value: /app/components/state.yaml
         ports:
         - containerPort: 8080
           name: http
+        volumeMounts:
+        - name: state-component
+          mountPath: /app/components
+          readOnly: true
+      volumes:
+      - name: state-component
+        configMap:
+          name: diagrid-dashboard-state
 ---
 apiVersion: v1
 kind: Service

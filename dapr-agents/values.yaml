@@ -95,7 +95,7 @@ kube-prometheus-stack:
       access: proxy
     - name: Tempo
       type: tempo
-      url: "http://dapr-agents-tempo.dapr-agents.svc.cluster.local:3100"
+      url: "http://dapr-agents-tempo.dapr-agents.svc.cluster.local:3200"
       access: proxy
 
 opentelemetry-collector:
@@ -279,13 +279,9 @@ llm:
 
 externalWebhook: { url: "http://localhost:8000" }
 
-secrets:
-  apiKeySafe: { keyId: "safe-api-1234", tokenValue: "mock_token_xyz_safe", expiry: "2026-01-01" }
-  database:
-    username: "dapr_agent_user"
-    password: "mock_db_password_890"
-    connectionString: "host=localhost;port=5432;database=prod"
-  agentConfig: { logLevel: "DEBUG", maxRetries: "3", cacheTtlSeconds: "300" }
+appSecrets: []
+  # - name: my-secret-key
+  #   value: my-secret-value
 
 redisInsight:
   enabled: true
