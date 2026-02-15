@@ -142,7 +142,7 @@ test-template:
 		--set kagent.enabled=false \
 		--set dapr.enabled=false \
 		--set llm.apiKey=test-key \
-		| kubeconform -strict -summary -schema-location default -skip CustomResourceDefinition,Component,HTTPEndpoint,Agent,Memory,ModelConfig,RemoteMCPServer,ToolServer,MCPServer
+		| kubeconform -strict -summary -schema-location default -skip CustomResourceDefinition,Component,Configuration,HTTPEndpoint,Agent,Memory,ModelConfig,RemoteMCPServer,ToolServer,MCPServer
 
 .PHONY: test-chainsaw
 test-chainsaw:
