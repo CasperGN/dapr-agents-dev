@@ -209,7 +209,8 @@ jobs:
         run: |
           cp /tmp/chart-release/dapr-agents-*.tgz .
           git show main:docs/index.html > index.html
-          git show main:docs/values.md > values.md
+          git show main:docs/values.html > values.html
+          git show main:docs/artifacthub-repo.yml > artifacthub-repo.yml
 
       - name: Update Helm repo index
         run: |

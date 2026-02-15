@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dapr Agents - Configuration Reference</title>
+  <style>
+    :root { --bg: #0d1117; --fg: #e6edf3; --muted: #8b949e; --accent: #58a6ff; --surface: #161b22; --border: #30363d; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: var(--bg); color: var(--fg); line-height: 1.6; padding: 2rem 1rem; }
+    .container { max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 2rem; margin-bottom: 0.25rem; }
+    h2 { font-size: 1.25rem; margin-top: 2.5rem; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+    p { color: var(--muted); margin-bottom: 1rem; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    pre { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; overflow-x: auto; margin-bottom: 1rem; font-size: 0.875rem; }
+    code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 0.875rem; }
+    th { text-align: left; padding: 0.6rem 0.75rem; background: var(--surface); border: 1px solid var(--border); color: var(--fg); font-weight: 600; }
+    td { padding: 0.5rem 0.75rem; border: 1px solid var(--border); }
+    td:first-child code { color: var(--accent); background: none; }
+    td:last-child code { color: #f0883e; background: none; }
+    td code, th code { font-size: 0.8125rem; }
+    .back { display: inline-block; margin-bottom: 1.5rem; color: var(--muted); font-size: 0.875rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a class="back" href="index.html">&larr; Back</a>
+    <h1>Configuration Reference</h1>
+    <p>All parameters for <a href="https://github.com/CasperGN/dapr-agents-dev/blob/main/dapr-agents/values.yaml">values.yaml</a></p>
+
+    <h2>Core Settings</h2>
+    <table>
+      <tr><th>Parameter</th><th>Description</th><th>Default</th></tr>
+      <tr><td><code>registry</code></td><td>Docker registry used for images</td><td><code>localhost:5001</code></td></tr>
+      <tr><td><code>global.logLevel</code></td><td>Global log level for components</td><td><code>DEBUG</code></td></tr>
+    </table>
+
+    <h2>Monitoring Stack</h2>
+    <table>
+      <tr><th>Parameter</th><th>Description</th><th>Default</th></tr>
+      <tr><td><code>monitoring.enabled</code></td><td>Enable the monitoring stack</td><td><code>true</code></td></tr>
+      <tr><td><code>loki.enabled</code></td><td>Enable Loki for log aggregation</td><td><code>true</code></td></tr>
+      <tr><td><code>tempo.enabled</code></td><td>Enable Tempo for distributed tracing</td><td><code>true</code></td></tr>
+      <tr><td><code>kube-prometheus-stack.enabled</code></td><td>Enable Prometheus + Grafana</td><td><code>true</code></td></tr>
+      <tr><td><code>kube-prometheus-stack.grafana.adminUser</code></td><td>Grafana admin username</td><td><code>admin</code></td></tr>
+      <tr><td><code>kube-prometheus-stack.grafana.adminPassword</code></td><td>Grafana admin password</td><td><code>admin</code></td></tr>
+      <tr><td><code>opentelemetry-collector.enabled</code></td><td>Enable OpenTelemetry Collector</td><td><code>true</code></td></tr>
+    </table>
+
+    <h2>Kagent</h2>
+    <table>
+      <tr><th>Parameter</th><th>Description</th><th>Default</th></tr>
+      <tr><td><code>kagent.enabled</code></td><td>Enable Kagent controller and UI</td><td><code>true</code></td></tr>
+      <tr><td><code>kagent.kmcp.enabled</code></td><td>Enable KMCP (MCP server for Kagent)</td><td><code>true</code></td></tr>
+      <tr><td><code>kagent.providers.default</code></td><td>Default LLM provider for Kagent</td><td><code>ollama</code></td></tr>
+      <tr><td><code>kagent.providers.openAI.apiKey</code></td><td>OpenAI API key for Kagent</td><td><code>""</code></td></tr>
+      <tr><td><code>kagent.providers.ollama.model</code></td><td>Ollama model for Kagent</td><td><code>llama3.2:latest</code></td></tr>
+    </table>
+
+    <h2>Dapr</h2>
+    <table>
+      <tr><th>Parameter</th><th>Description</th><th>Default</th></tr>
+      <tr><td><code>dapr.enabled</code></td><td>Enable Dapr control plane</td><td><code>true</code></td></tr>
+    </table>
+
+    <h2>Redis</h2>
+    <table>
+      <tr><th>Parameter</th><th>Description</th><th>Default</th></tr>
+      <tr><td><code>redis.enabled</code></td><td>Enable Redis (state store / pubsub)</td><td><code>true</code></td></tr>
+      <tr><td><code>redis.image</code></td><td>Redis container image</td><td><code>redis</code></td></tr>
+      <tr><td><code>redis.tag</code></td><td>Redis image tag</td><td><code>6.2</code></td></tr>
+      <tr><td><code>redis.password</code></td><td>Redis password (empty = no auth)</td><td><code>""</code></td></tr>
+      <tr><td><code>redisConfig.serviceName</code></td><td>Redis service name</td><td><code>dapr-redis-master</code></td></tr>
+      <tr><td><code>redisInsight.enabled</code></td><td>Enable RedisInsight UI</td><td><code>true</code></td></tr>
+    </table>
+
+    <h2>LLM Provider</h2>
+    <table>
+      <tr><th>Parameter</th><th>Description</th><th>Default</th></tr>
+      <tr><td><code>llm.provider</code></td><td>Default LLM provider (<code>ollama</code> or <code>openAI</code>)</td><td><code>ollama</code></td></tr>
+      <tr><td><code>llm.apiKey</code></td><td>API key for the LLM provider</td><td><code>dummy-key</code></td></tr>
+      <tr><td><code>llm.ollama.enabled</code></td><td>Enable Ollama provider</td><td><code>true</code></td></tr>
+      <tr><td><code>llm.ollama.model</code></td><td>Ollama model name</td><td><code>llama3.2:latest</code></td></tr>
+      <tr><td><code>llm.ollama.endpoint</code></td><td>Ollama API endpoint</td><td><code>http://host.docker.internal:11434/v1</code></td></tr>
+      <tr><td><code>llm.openAI.model</code></td><td>OpenAI model name</td><td><code>gpt-4o-mini</code></td></tr>
+    </table>
+
+    <h2>OpenTelemetry</h2>
+    <table>
+      <tr><th>Parameter</th><th>Description</th><th>Default</th></tr>
+      <tr><td><code>opentelemetry.enabled</code></td><td>Enable OTEL config (tracing, Redis seed)</td><td><code>true</code></td></tr>
+      <tr><td><code>opentelemetry.endpoint</code></td><td>OTEL collector gRPC endpoint</td><td><code>dapr-agents-opentelemetry-collector.dapr-agents.svc.cluster.local:4317</code></td></tr>
+      <tr><td><code>opentelemetry.protocol</code></td><td>OTEL export protocol</td><td><code>grpc</code></td></tr>
+    </table>
+
+    <h2>Application Secrets</h2>
+    <table>
+      <tr><th>Parameter</th><th>Description</th><th>Default</th></tr>
+      <tr><td><code>appSecrets</code></td><td>Array of secrets to create in <code>app-secrets</code> Secret</td><td><code>[]</code></td></tr>
+    </table>
+    <p>Each entry in <code>appSecrets</code> has <code>name</code> and <code>value</code>:</p>
+<pre><code>appSecrets:
+  - name: my-api-key
+    value: secret123
+  - name: db-password
+    value: pass456</code></pre>
+
+    <h2>Other</h2>
+    <table>
+      <tr><th>Parameter</th><th>Description</th><th>Default</th></tr>
+      <tr><td><code>diagridDashboard.enabled</code></td><td>Enable Diagrid Dapr Dashboard</td><td><code>true</code></td></tr>
+      <tr><td><code>gateway.enabled</code></td><td>Enable the stack gateway</td><td><code>true</code></td></tr>
+      <tr><td><code>externalWebhook.url</code></td><td>External webhook URL</td><td><code>http://localhost:8000</code></td></tr>
+      <tr><td><code>agents</code></td><td>Custom Dapr agent definitions</td><td><code>{}</code></td></tr>
+    </table>
+  </div>
+</body>
+</html>
