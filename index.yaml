@@ -1,0 +1,39 @@
+apiVersion: v1
+entries:
+  dapr-agents:
+  - apiVersion: v2
+    appVersion: 0.1.1
+    created: "2026-02-15T11:24:49.276704721Z"
+    dependencies:
+    - condition: monitoring.enabled
+      name: loki
+      repository: https://grafana.github.io/helm-charts
+      version: 6.53.0
+    - condition: monitoring.enabled
+      name: tempo
+      repository: https://grafana.github.io/helm-charts
+      version: 1.24.4
+    - condition: monitoring.enabled
+      name: kube-prometheus-stack
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 81.6.9
+    - condition: monitoring.enabled
+      name: opentelemetry-collector
+      repository: https://open-telemetry.github.io/opentelemetry-helm-charts
+      version: 0.145.0
+    - condition: dapr.enabled
+      name: dapr
+      repository: https://dapr.github.io/helm-charts/
+      version: 1.17.0-rc.3
+    - condition: kagent.enabled
+      name: kagent
+      repository: oci://ghcr.io/kagent-dev/kagent/helm
+      version: 0.7.14
+    description: A Helm chart for deploying Dapr Agents
+    digest: 7acadbf036a0584e3693dc542bd5d3771e62c838904a36b8763db37a2644bc26
+    name: dapr-agents
+    type: application
+    urls:
+    - https://caspergn.github.io/dapr-agents-dev/dapr-agents-0.1.1.tgz
+    version: 0.1.1
+generated: "2026-02-15T11:24:49.221474904Z"

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dapr Agents Helm Chart</title>
+  <style>
+    :root { --bg: #0d1117; --fg: #e6edf3; --muted: #8b949e; --accent: #58a6ff; --surface: #161b22; --border: #30363d; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: var(--bg); color: var(--fg); line-height: 1.6; padding: 2rem 1rem; }
+    .container { max-width: 720px; margin: 0 auto; }
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.25rem; margin-top: 2rem; margin-bottom: 0.75rem; color: var(--fg); }
+    p { color: var(--muted); margin-bottom: 1rem; }
+    pre { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; overflow-x: auto; margin-bottom: 1rem; font-size: 0.875rem; }
+    code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; color: var(--fg); }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    ul { list-style: none; padding: 0; }
+    ul li { padding: 0.25rem 0; }
+    ul li::before { content: "\2192 "; color: var(--muted); }
+    .badge { display: inline-block; margin-right: 0.5rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Dapr Agents Helm Chart</h1>
+    <p>A comprehensive Helm chart for deploying Dapr Agents with monitoring, observability, and AI agent tooling.</p>
+
+    <h2>Install via Helm Repository</h2>
+<pre><code>helm repo add dapr-agents https://caspergn.github.io/dapr-agents-dev/
+helm repo update
+helm install dapr-agents dapr-agents/dapr-agents \
+  --namespace dapr-agents --create-namespace</code></pre>
+
+    <h2>Install via OCI Registry</h2>
+<pre><code>helm install dapr-agents oci://ghcr.io/caspergn/charts/dapr-agents \
+  --namespace dapr-agents --create-namespace</code></pre>
+
+    <h2>With a custom LLM API key</h2>
+<pre><code>helm install dapr-agents dapr-agents/dapr-agents \
+  --namespace dapr-agents --create-namespace \
+  --set llm.apiKey=your-key</code></pre>
+
+    <h2>Links</h2>
+    <ul>
+      <li><a href="values.md">Configuration Reference (values.yaml)</a></li>
+      <li><a href="https://github.com/CasperGN/dapr-agents-dev">GitHub Repository</a></li>
+      <li><a href="https://github.com/CasperGN/dapr-agents-dev/releases">Releases</a></li>
+    </ul>
+  </div>
+</body>
+</html>
