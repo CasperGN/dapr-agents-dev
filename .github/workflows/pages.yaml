@@ -1,0 +1,42 @@
+name: Update Pages Docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+
+permissions:
+  contents: write
+
+jobs:
+  update-docs:
+    name: Update GitHub Pages Docs
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    concurrency:
+      group: gh-pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Update docs on gh-pages
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if ! git ls-remote --heads origin gh-pages | grep -q gh-pages; then
+            echo "gh-pages branch does not exist yet. Skipping."
+            exit 0
+          fi
+
+          git checkout gh-pages
+
+          git show main:docs/index.html > index.html
+          git show main:docs/values.md > values.md
+
+          git add .
+          git diff --cached --quiet || git commit -m "Update documentation"
+          git push origin gh-pages
