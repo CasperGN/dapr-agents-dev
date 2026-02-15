@@ -84,5 +84,12 @@ jobs:
           tar xzf kubeconform.tar.gz
           sudo mv kubeconform /usr/local/bin/
 
+      - name: Restore registry mirror cache
+        uses: actions/cache@v4
+        with:
+          path: /tmp/registry-mirror-cache
+          key: mirror-cache-${{ hashFiles('dapr-agents/Chart.yaml', 'dapr-agents/values.yaml') }}
+          restore-keys: mirror-cache-
+
       - name: Run integration tests
         run: make test-chainsaw

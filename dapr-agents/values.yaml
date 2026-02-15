@@ -168,8 +168,14 @@ kagent:
   enabled: true
   fullnameOverride: kagent
   controller:
+    resources:
+      requests: { cpu: 50m, memory: 64Mi }
+      limits: { cpu: 500m, memory: 256Mi }
     service: { type: NodePort, ports: { nodePort: 30083 } }
   ui:
+    resources:
+      requests: { cpu: 50m, memory: 64Mi }
+      limits: { cpu: 500m, memory: 256Mi }
     service: { type: NodePort, ports: { nodePort: 30081 } }
   kmcp:
     enabled: true
@@ -182,6 +188,9 @@ kagent:
       url: "http://dapr-agents-grafana.dapr-agents.svc.cluster.local"
   kagent-tools:
     fullnameOverride: kagent-tools
+    resources:
+      requests: { cpu: 50m, memory: 64Mi }
+      limits: { cpu: 500m, memory: 256Mi }
     tools:
       prometheus:
         url: "http://dapr-agents-kube-prometheu-prometheus.dapr-agents.svc.cluster.local:9090"
