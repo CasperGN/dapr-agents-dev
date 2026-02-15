@@ -10,6 +10,7 @@ This Helm chart simplifies the deployment of a complete Dapr-based agentic ecosy
 
 - Kubernetes 1.23+
 - Helm 3.10+
+- Ollama or OpenAI API Key
 
 ## Installation
 

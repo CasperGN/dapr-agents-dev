@@ -1,8 +1,9 @@
 apiVersion: v2
 name: dapr-agents
-description: A comprehensive developer stack for working with Dapr, Monitoring, and AI Agents.
+description: |
+  A comprehensive developer stack for working with Dapr Agents as well as Observability & Traceability of AI Agents.
 type: application
-version: 0.1.2
+version: 0.1.3
 appVersion: "0.1.1"
 home: https://github.com/caspergn/dapr-agents-dev
 sources:
