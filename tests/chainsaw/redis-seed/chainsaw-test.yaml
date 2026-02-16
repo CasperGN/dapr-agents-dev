@@ -24,11 +24,24 @@ spec:
 
               REDIS_HOST="dapr-redis-master.dapr-agents.svc.cluster.local"
 
+              # Debug: echo host and auth (remove after debugging)
+              echo "REDIS_HOST: $REDIS_HOST"
+              echo "AUTH set: $([ -n "$AUTH" ] && echo 'yes' || echo 'no')"
+
+              # Wait for Redis to be ready (like the job does)
+              until kubectl run redis-ping --rm --restart=Never \
+                --namespace dapr-agents \
+                --image=redis:6.2 \
+                -- redis-cli -h "$REDIS_HOST" $AUTH ping | grep -q PONG; do
+                echo "Waiting for Redis..."
+                sleep 2
+              done
+
               # Run redis-cli inside the cluster via a temporary pod
               RESULT=$(kubectl run redis-check --rm --restart=Never \
                 --namespace dapr-agents \
                 --image=redis:6.2 \
-                -- redis-cli -h "$REDIS_HOST" $AUTH HGETALL agent_runtime 2>/dev/null)
+                -- redis-cli -h "$REDIS_HOST" $AUTH HGETALL agent_runtime)
 
               echo "Raw result:"
               echo "$RESULT"
