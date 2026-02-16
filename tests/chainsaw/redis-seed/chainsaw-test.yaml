@@ -9,6 +9,19 @@ spec:
     assert: 5m
     exec: 5m
   steps:
+    - name: wait-for-redis-seed-job
+      try:
+        - assert:
+            resource:
+              apiVersion: batch/v1
+              kind: Job
+              metadata:
+                name: redis-seed
+                namespace: dapr-agents
+              status:
+                conditions:
+                  - type: Complete
+                    status: "True"
     - name: verify-agent-runtime-hash
       try:
         - script:
