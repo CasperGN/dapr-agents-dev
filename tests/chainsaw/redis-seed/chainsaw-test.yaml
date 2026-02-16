@@ -9,19 +9,6 @@ spec:
     assert: 5m
     exec: 5m
   steps:
-    - name: wait-for-redis-seed-job
-      try:
-        - assert:
-            resource:
-              apiVersion: batch/v1
-              kind: Job
-              metadata:
-                name: redis-seed
-                namespace: dapr-agents
-              status:
-                conditions:
-                  - type: Complete
-                    status: "True"
     - name: verify-agent-runtime-hash
       try:
         - script:
@@ -38,7 +25,7 @@ spec:
               REDIS_HOST="dapr-redis-master.dapr-agents.svc.cluster.local"
 
               # Run redis-cli inside the cluster via a temporary pod
-              RESULT=$(kubectl run redis-check --rm -i --restart=Never \
+              RESULT=$(kubectl run redis-check --rm --restart=Never \
                 --namespace dapr-agents \
                 --image=redis:6.2 \
                 -- redis-cli -h "$REDIS_HOST" $AUTH HGETALL agent_runtime 2>/dev/null)
