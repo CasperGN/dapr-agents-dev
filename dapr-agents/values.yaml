@@ -107,7 +107,7 @@ opentelemetry-collector:
       effect: NoSchedule
   image:
     repository: otel/opentelemetry-collector-contrib
-    tag: "0.145.0"
+    tag: "0.146.1"
   service:
     type: NodePort
   config:
