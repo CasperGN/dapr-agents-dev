@@ -58,6 +58,6 @@ dependencies:
     condition: dapr.enabled
 
   - name: kagent
-    version: 0.7.14
+    version: 0.7.19
     repository: oci://ghcr.io/kagent-dev/kagent/helm
     condition: kagent.enabled
